@@ -1,6 +1,7 @@
 import React from "react";
 import { Text } from "react-native";
+import Routes from "./routes";
 
-const App = ()=> <Text>00000@</Text>;
+const App = ()=> <Routes/>;
 
 export default App;
