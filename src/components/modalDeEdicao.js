@@ -1,17 +1,45 @@
 import React, { Component } from "react";
 import { View, Text , StyleSheet, TouchableOpacity, Modal, Button, TextInput} from "react-native";
+import { withNavigation } from "react-navigation";
 
 
-const ModalEdicao=({modalFunctions})=>(
+class ModalEdicao extends Component{
 	
-		<Modal  onRequestClose={()=>modalFunctions.dismiss} animationType="slide" visible={modalFunctions.modalStatus } >
+	
+state={
+	item:{
+		precoCalabresa:0,
+        precoCarne:0,
+        precoQueijo:0,
+        precoMassa :0,
+        precoIngredientesPizza:0,
+        precoBanana:0,
+		}
+	}
+	
+	
+
+	render(){
+		const { params } = this.props.navigation.state;
+const { navigation }= this.props;
+const  pag2State = this.props;
+
+	edit=async()=>{
+	await  params.mainState.handleEditItem(params.mainState.editedItem);
+	
+	params.edit(editedItem);
+	navigation.goBack();
+	};
+	
+	return(
+		<Modal  onRequestClose={()=>this.props.navigation.goBack() } animationType="slide" visible={pag2State.modalStatus}>
 		<View style={styles.containerMaster}>
-		<Text style={styles.listTitle}>Gastos</Text>
+		<Text style={styles.listTitle}>Gatos</Text>
 		
 			
 			<View style={styles.container}>
 			
-			<TextInput placeholder="Massa" style={styles.input} keyboardType="numeric" onChangeText={title=> modalFunctions.precoMassa(title)} />
+			<TextInput placeholder="Massa" style={styles.input} value={String(params.product.precoMassa)} keyboardType="numeric" onChangeText={title=> modalFunctions.precoMassa(title)} />
 			
 			
 			<TextInput placeholder="Carne" style={styles.input} keyboardType="numeric" onChangeText={title=> modalFunctions.precoCarne(title)} />
@@ -43,9 +71,9 @@ const ModalEdicao=({modalFunctions})=>(
 	
 		</View>
 		<View style={{flexDirection:"row", justifyContent:"space-between"}}>
-				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(modalFunctions.dismiss)}><Text style={{color:"#56D6FF"}}>Cancelar</Text></TouchableOpacity>
+				<TouchableOpacity style={styles.buttonCancel} onPress={()=> navigation.goBack()}><Text style={{color:"#56D6FF"}}>Cancelar</Text></TouchableOpacity>
 				
-				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(modalFunctions.dismiss ,modalFunctions.adicionarItem)}><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
+				<TouchableOpacity style={styles.buttonCancel} onPress={edit}><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
 				
 				
 				</View>
@@ -54,11 +82,11 @@ const ModalEdicao=({modalFunctions})=>(
 		
 		</Modal>
 			
-
+			);
+		}
+}
 		
-	 	);
-		
-		export default ModalEdicao;
+		export default withNavigation(ModalEdicao);
 
 const styles=StyleSheet.create({
 	containerMaster:{

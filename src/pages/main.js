@@ -1,13 +1,20 @@
 import React , { Component } from "react";
-import { View, Text , StyleSheet, TouchableOpacity, FlatList, TextInput, TouchableHighlight } from "react-native";
+import { AsyncStorage, View, Text , StyleSheet, TouchableOpacity, FlatList, TextInput, TouchableHighlight } from "react-native";
 import ModalCompra from "../components/modal";
+
+
 export default class Main extends Component{
 	
 	static navigationOptions={
 		title:"FormData",
 	};
-		
-	state={
+	
+constructor(props){
+	super(props);
+	
+	
+	
+	this.state={
 		item:[],
 		today:"",
 		precoCalabresa:0,
@@ -16,22 +23,32 @@ export default class Main extends Component{
         precoMassa :0,
         precoIngredientesPizza:0,
         precoBanana:0,
+        
+        storage:"",
       
 		modalVisible:false,
 		
-		modalFunctions:[{
-			openModal:this.openModalEdicao,
+		// modalFunctions
+			openModalEdicao:this.openModalEdicao,
 			modalStatus:false,
-			dismiss:this.closeModal,
+			dismiss:this.closeModalEdicao,
 			adicionarItem:this.adicionarItem,
-			precoCalabresa:this.setPrecoCalabresa,
-			precoCarne:this.setPrecoCarne,
-			precoBanana:this.setPrecoBanana,		precoQueijo:this.setPrecoQueijo,
-			precoMassa:this.setPrecoMassa,		
-			precoIngredientesPizza:this.setPrecoIngredientesPizza,
+	
+			editedItem:"",
+			handleEditItem:(editedItem)=>{
+		const NewItem=this.state.item.map(item=>{
+		if(item.id==editedItem){
 			
-		}],
-	} ;
+			item.precoMassa="FOIII";
+			
+			return item;
+			}
+			return item;
+		});
+		this.setState({item:NewItem});
+	},
+ }
+} ;
 	
 	
 	adicionarItem= async ( ) =>{
@@ -54,9 +71,11 @@ export default class Main extends Component{
 		
 		precoTotal:Number(this.state.precoQueijo)+Number(this.state.precoCarne)+Number(this.state.precoBanana)+Number(this.state.precoMassa)+Number(this.state.precoIngredientesPizza)+Number(this.state.precoCalabresa),
 		
-		id: String(this.state.item.length),
+		id:String(this.state.item.length),
 		};
-	
+		
+		this.saveItemInStorage(novoItem);
+		
 		this.setState({item:[ ...this.state.item , novoItem]});
 	
 	};
@@ -65,7 +84,7 @@ export default class Main extends Component{
 	
 	<View style={styles.productView}>
 			
-		<TouchableOpacity onPress={()=>(this.props.navigation.navigate("Page2", { product:item, modalFunctions: this.state.modalFunctions})) }>
+		<TouchableOpacity onPress={()=>{ this.setEditedItem(item.id); this.props.navigation.navigate("Page2", { product:item, mainState:this.state });} }>
 			<Text style={styles.productTitle}>
 				{item.data}
 			</Text>
@@ -74,29 +93,39 @@ export default class Main extends Component{
 	</View>
 	);
 	
-
 	
-	editItem=()=>{
+	saveItemInStorage= async (novoItem)=>{
+	try{
+		await AsyncStorage.setItem(novoItem.id , JSON.stringify(novoItem));
 		
-		this.state.modalVisible=true;
+		}catch(error){
+			alert(error);
+		}
 		
-		<ModalCompra calabresa="10" />;
-	
 	};
+	
+	setEditedItem=(item)=>this.setState({editedItem: item});
+	
+	saveTroxa=async()=>{
+			try{
+		await AsyncStorage.setItem("user", "Troxa");
+		
+    		 }catch(error){
+		alert("deu ruim");
+			}  
+		
+		};
 	
 	openModal=()=>{
 		this.setState({modalVisible:true})
 		
 	};
-	openModalEdicao=()=>(
-		this.setState({modalFunctions:[...this.state.modalFunctions, {modalStatus:true}]})
-	);
 	
+
 	closeModal= ()=>(
 		this.setState({modalVisible:false})
 	);
 	
-	setTitle= title => this.setState({title});
 	
 	setPrecoCarne= precoCarne =>( this.setState({precoCarne}));
 		
@@ -122,6 +151,8 @@ export default class Main extends Component{
 precoCalabresa={this.setPrecoCalabresa} precoCarne={this.setPrecoCarne} precoBanana={this.setPrecoBanana} precoQueijo={this.setPrecoQueijo}
 precoMassa={this.setPrecoMassa}
 precoIngredientesPizza={this.setPrecoIngredientesPizza}/>
+
+	
 
 			<TouchableOpacity onPress={this.openModal} style={styles.button}><Text style={{color:"#56D6FF",fontSize:25}}>+</Text></TouchableOpacity>
 			
