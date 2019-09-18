@@ -7,24 +7,37 @@ export default class Main extends Component{
 	
 	static navigationOptions={
 		title:"FormData",
-	};
+		
+		headerRight:<View/>,
+		headerLeft:<TouchableOpacity onPress={()=>{
+	const clear=async()=>{
+		try{
+		alert("removed");
+		await AsyncStorage.clear();
+		}catch(error){
+			alert("fail");
+		}
+	}
+	
+	clear();
+}
+} style={{marginLeft:10}}><Text>Clear</Text></TouchableOpacity>,
+
+};
 	
 constructor(props){
 	super(props);
 	
 	
-	
 	this.state={
 		item:[],
 		today:"",
-		precoCalabresa:0,
-        precoCarne:0,
-        precoQueijo:0,
-        precoMassa :0,
-        precoIngredientesPizza:0,
-        precoBanana:0,
-        
-        storage:"",
+		precoCalabresa:"",
+        precoCarne:"",
+        precoQueijo:"",
+        precoMassa :"",
+        precoIngredientesPizza:"",
+        precoBanana:"",
       
 		modalVisible:false,
 		
@@ -35,6 +48,7 @@ constructor(props){
 			adicionarItem:this.adicionarItem,
 	
 			editedItem:"",
+			
 			handleEditItem:(editedItem)=>{
 		const NewItem=this.state.item.map(item=>{
 		if(item.id==editedItem){
@@ -49,9 +63,40 @@ constructor(props){
 	},
  }
 } ;
+
+
+
+
+	
+	componentDidMount(){
+		this.load();
+	};
+	
+	load=async()=>{
+	try{
+	const keys=await AsyncStorage.getAllKeys();
+	
+const item=await AsyncStorage.multiGet(keys,(err, stores)=>{
+	
+	stores.map((result, i , store)=>{
+		let key=store[i][0];
+		let value=store[i][1];
+		
+	const parsed=JSON.parse(value);
+		
+	if(parsed!==null)this.setState({item:[...this.state.item,parsed]});
+	});
+});
 	
 	
-	adicionarItem= async ( ) =>{
+	
+	}catch(error){
+		alert(error);
+	}
+	};
+	
+	adicionarItem=async( ) =>{
+		if(this.preenchido()){
 		let today = new Date();
 		let dd = String(today.getDate()).padStart(2, '0');
 		let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -71,16 +116,18 @@ constructor(props){
 		
 		precoTotal:Number(this.state.precoQueijo)+Number(this.state.precoCarne)+Number(this.state.precoBanana)+Number(this.state.precoMassa)+Number(this.state.precoIngredientesPizza)+Number(this.state.precoCalabresa),
 		
-		id:String(this.state.item.length),
+		id:String(this.state.item.length+1),
 		};
 		
 		this.saveItemInStorage(novoItem);
 		
 		this.setState({item:[ ...this.state.item , novoItem]});
-	
+		
+		this.closeModal();
+	} else alert("preencha todos os campos");
 	};
 	
-	renderItem= ({item}=this.state) =>(
+	renderItem= ({item}=this.state)=>(
 	
 	<View style={styles.productView}>
 			
@@ -104,28 +151,28 @@ constructor(props){
 		
 	};
 	
-	setEditedItem=(item)=>this.setState({editedItem: item});
 	
-	saveTroxa=async()=>{
-			try{
-		await AsyncStorage.setItem("user", "Troxa");
-		
-    		 }catch(error){
-		alert("deu ruim");
-			}  
-		
-		};
-	
-	openModal=()=>{
-		this.setState({modalVisible:true})
-		
+	removeItems=()=>{
+		this.setState({item:[]});
+		alert("foo");
 	};
 	
-
-	closeModal= ()=>(
-		this.setState({modalVisible:false})
-	);
+	setEditedItem=(item)=>this.setState({editedItem: item});
 	
+	
+	openModal=()=>this.setState({modalVisible:true});
+	
+
+	closeModal=()=> this.setState({modalVisible:false});
+	
+
+	
+	preenchido=()=>{
+		if(this.state.precoCalabresa && this.state.precoCarne && this.state.precoQueijo && this.state.precoMassa && this.state.precoIngredientesPizza && this.state.precoBanana)
+		return true;
+		
+		else return false;
+		}
 	
 	setPrecoCarne= precoCarne =>( this.setState({precoCarne}));
 		
@@ -147,7 +194,7 @@ constructor(props){
 			
 			<FlatList contentContainerStyle={styles.list} renderItem={ this.renderItem } data={ this.state.item} keyExtractor={ item => item.id }/>
 			
-			<ModalCompra modalStatus={this.state.modalVisible} dismiss={this.closeModal} adicionarItem={this.adicionarItem} 
+			<ModalCompra modalStatus={this.state.modalVisible} dismiss={this.closeModal} adicionar={this.adicionarItem} 
 precoCalabresa={this.setPrecoCalabresa} precoCarne={this.setPrecoCarne} precoBanana={this.setPrecoBanana} precoQueijo={this.setPrecoQueijo}
 precoMassa={this.setPrecoMassa}
 precoIngredientesPizza={this.setPrecoIngredientesPizza}/>

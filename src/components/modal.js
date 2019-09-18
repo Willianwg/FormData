@@ -48,7 +48,7 @@ export default class ModalCompra extends Component{
 		<View style={{flexDirection:"row", justifyContent:"space-between"}}>
 				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(this.props.dismiss())}><Text style={{color:"#56D6FF"}}>Cancelar</Text></TouchableOpacity>
 				
-				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(this.props.dismiss(), this.props.adicionarItem())}><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
+				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(this.props.adicionar())}><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
 				
 				</View>
 				

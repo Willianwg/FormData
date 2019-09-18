@@ -16,34 +16,26 @@ static navigationOptions=({navigation})=>({
 		super(props);
 		
 		this.state={
-			
-		precoCalabresa:this.props.navigation.state.params.product.precoCalabresa,
-        precoCarne:this.props.navigation.state.params.product.precoCarne,
-        precoQueijo:this.props.navigation.state.params.product.precoQueijo,
-        precoMassa :this.props.navigation.state.params.product.precoMassa,
-        precoIngredientesPizza:this.props.navigation.state.params.product.precoIngredientesPizza,
-        precoBanana:this.props.navigation.state.params.product.precoBanana,
-        precoTotal:this.props.navigation.state.params.product.precoTotal,
-        
-		modalStatus:false,
-		dismiss:this.closeModalEdicao,
-		openModalEdicao:this.openModalEdicao,
-		
-		storage:this.try(),
+		storage:"",
 		
 		};
 	};
 	
+	
 	componentDidMount(){
-		this.try();
+		this.getStorage(this.props.navigation.state.params.product.id);
 	};
 	
-	
-	try=async()=>{
-		const user=await AsyncStorage.getItem("0");
-		const parsed=JSON.parse(user);
-		return parsed;
+	getStorage=async(id)=>{
+		try{
+		const item=await AsyncStorage.getItem(id);
+		alert(id);
+		const parsed=JSON.parse(item);
+		this.setState({storage:parsed});
 		
+		}catch(error){
+			alert("sacooo");
+		}
 	};
 	
 	
@@ -52,30 +44,29 @@ static navigationOptions=({navigation})=>({
 	render(){
 		
 	const { navigation }= this.props;
-	const compra= this.try();
+
 		return(
 	<ScrollView>
 	<View style={styles.container}>
 		<Text style={styles.label}>Gastos</Text>
 		
-		<Text style={styles.title}>Preço Massa: R${storage.precoMassa}</Text>
+		<Text style={styles.title}>Preço Massa: R${this.state.storage.precoMassa}</Text>
 		
-		<Text style={styles.title}>Preço Calabresa: R${this.state.precoCalabresa}</Text>
+		<Text style={styles.title}>Preço Calabresa: R${this.state.storage.precoCalabresa}</Text>
 		
-		<Text style={styles.title}>Preço queijo: R${this.state.precoQueijo}</Text>
+		<Text style={styles.title}>Preço queijo: R${this.state.storage.precoQueijo}</Text>
 		
-		<Text style={styles.title}>Carne:R${this.state.precoCarne}</Text>
+		<Text style={styles.title}>Carne:R${this.state.storage.precoCarne}</Text>
 		
-		<Text style={styles.title}>Preço Banana🍌:R${this.state.precoBanana}</Text>
+		<Text style={styles.title}>Preço Banana🍌:R${this.state.storage.precoBanana}</Text>
 		
-		<Text style={styles.title}>Preço ingredientes 🍕:R${this.state.precoIngredientesPizza}</Text>
+		<Text style={styles.title}>Preço ingredientes 🍕:R${this.state.storage.precoIngredientesPizza}</Text>
 		
-		<Text style={styles.title}>Total: R${this.state.precoTotal}</Text>
+		<Text style={styles.title}>Total: R${this.state.storage.precoTotal}</Text>
 		
 		<Text style={styles.label}>Produção</Text>
 		
-		<ModalEdicao dismiss={this.dismiss} modalStatus={this.state.modalStatus}/>
-		
+	
 	</View>
 	
 	</ScrollView>
