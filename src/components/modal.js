@@ -8,7 +8,7 @@ export default class ModalCompra extends Component{
 	render(){
 		return(
 	
-		<Modal  onRequestClose={()=> this.props.dismiss()} animationType="slide" visible={this.props.modalStatus } >
+		<Modal  onRequestClose={()=>this.props.changeModalVisibility(false)} animationType="slide" visible={this.props.modalStatus } >
 		<View style={styles.containerMaster}>
 		<Text style={styles.listTitle}>Gastos</Text>
 		
@@ -46,9 +46,9 @@ export default class ModalCompra extends Component{
 	
 		</View>
 		<View style={{flexDirection:"row", justifyContent:"space-between"}}>
-				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(this.props.dismiss())}><Text style={{color:"#56D6FF"}}>Cancelar</Text></TouchableOpacity>
+				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(this.props.changeModalVisibility(false))}><Text style={{color:"#56D6FF"}}>Cancelar</Text></TouchableOpacity>
 				
-				<TouchableOpacity style={styles.buttonCancel} onPress={()=>(this.props.adicionar())}><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
+				<TouchableOpacity style={styles.buttonCancel} onPress={()=> this.props.adicionar() }><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
 				
 				</View>
 				

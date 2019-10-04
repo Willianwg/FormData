@@ -8,7 +8,7 @@ static navigationOptions=({navigation})=>({
 	
 	title:navigation.state.params.product.data,
 	
-	headerRight:<TouchableOpacity onPress={()=> navigation.navigate("ModalEdicao",{ product: navigation.state.params.product, mainState:navigation.state.params.mainState})} style={{marginRight:10}}><Text >Edit</Text></TouchableOpacity>,
+	headerRight:<TouchableOpacity onPress={ ()=> navigation.navigate("ModalEdicao",{ product: navigation.state.params.product, mainState:navigation.state.params.mainState, save:navigation.state.params.save }) } style={{marginRight:10}}><Text >Edit</Text></TouchableOpacity>,
 	
 	
 });
@@ -29,7 +29,6 @@ static navigationOptions=({navigation})=>({
 	getStorage=async(id)=>{
 		try{
 		const item=await AsyncStorage.getItem(id);
-		alert(id);
 		const parsed=JSON.parse(item);
 		this.setState({storage:parsed});
 		
@@ -73,7 +72,6 @@ static navigationOptions=({navigation})=>({
 		);
 	}
 }
-
 
 
 const styles=StyleSheet.create({

@@ -1,93 +1,110 @@
-import React, { Component } from "react";
-import { View, Text , StyleSheet, TouchableOpacity, Modal, Button, TextInput} from "react-native";
-import { withNavigation } from "react-navigation";
+import React, { useEffect, useState } from "react";
+import { AsyncStorage, View, Text , StyleSheet, TouchableOpacity, Modal, Button, TextInput} from "react-native";
+import Input from "./input";
+import { connect } from "react-redux";
 
+const ModalEdicao = ({modules,navigation})=>{
+	const [edit, setEdit ]= useState({});				const [storage, setStorage] = useState([]);
+	const [ precoMassa,setMassa]= useState("");
+	const [precoQueijo,setQueijo]=useState("");
+	const [precoIngredientesPizza,setIngredientes]=useState("");
+	const [precoBanana, setBanana]=useState("");
+	const [precoCalabresa, setCalabresa]=useState("");
+	const [precoCarne, setCarne]=useState("");
+	
+	const { params }= navigation.state;
+	const { product }= params;
+	
+	useEffect( ( )=>{
 
-class ModalEdicao extends Component{
+		getStorage(product.id);
+		passStorageValuesToState();
+		
+	}, [ ] );
 	
-	
-state={
-	item:{
-		precoCalabresa:0,
-        precoCarne:0,
-        precoQueijo:0,
-        precoMassa :0,
-        precoIngredientesPizza:0,
-        precoBanana:0,
+	const getStorage=async(id)=>{
+		try{
+		const item=await AsyncStorage.getItem(id);
+		const parsed=JSON.parse(item);
+		setStorage(parsed);
+		
+		}catch(error){
+			alert("sacooo");
 		}
-	}
-	
-	
-
-	render(){
-		const { params } = this.props.navigation.state;
-const { navigation }= this.props;
-const  pag2State = this.props;
-
-	edit=async()=>{
-	await  params.mainState.handleEditItem(params.mainState.editedItem);
-	
-	params.edit(editedItem);
-	navigation.goBack();
 	};
 	
+	function passStorageValuesToState(){
+		setCarne(storage.precoCarne);
+		setCalabresa(storage.precoCalabresa);
+		setBanana(storage.precoBanana);
+		setMassa(storage.precoMassa);
+		setIngredientes(storage.precoIngredientesPizza);
+		setQueijo(storage.precoQueijo);
+		
+	}; 
+	
+	const save=async()=>{
+		
+		await saveEditedItem();
+		//await params.save(edit);
+		navigation.goBack();
+		
+	};
+	
+	const saveEditedItem=()=>{
+		let edited={
+			data: storage.data,
+			id: storage.id,
+			precoMassa,
+			precoCalabresa,
+			precoIngredientesPizza,
+			precoQueijo,
+			precoCarne,
+			precoBanana,
+			
+			precoTotal:Number(precoQueijo)+Number(precoCarne)+Number(precoBanana)+Number(precoMassa)+Number(precoIngredientesPizza)+Number(precoCalabresa),
+			
+		};
+		setEdit(edited);
+		alert(product.data); 
+	};
+	
+	
 	return(
-		<Modal  onRequestClose={()=>this.props.navigation.goBack() } animationType="slide" visible={pag2State.modalStatus}>
+		<Modal  onRequestClose={()=>navigation.goBack() } animationType="slide">
 		<View style={styles.containerMaster}>
-		<Text style={styles.listTitle}>Gatos</Text>
-		
-			
-			<View style={styles.container}>
-			
-			<TextInput placeholder="Massa" style={styles.input} value={String(params.product.precoMassa)} keyboardType="numeric" onChangeText={title=> modalFunctions.precoMassa(title)} />
-			
-			
-			<TextInput placeholder="Carne" style={styles.input} keyboardType="numeric" onChangeText={title=> modalFunctions.precoCarne(title)} />
-				
-		<TextInput keyboardType="numeric" placeholder="Queijo" style={styles.input} onChangeText={quantidade=>modalFunctions.precoQueijo(quantidade)} />	
-		</View>
-	
-	<View style={styles.container}>
-		
-	<TextInput placeholder="Calabresa" style={styles.input} keyboardType="numeric" onChangeText={valor=>modalFunctions.precoCalabresa(valor) } />		
-	
-	<TextInput placeholder="Banana" style={styles.input} keyboardType="numeric" onChangeText={title=>modalFunctions.precoBanana(title)} />
-	
-	<TextInput placeholder="ingredientes Pizza" style={styles.input} keyboardType="numeric" onChangeText={title=>modalFunctions.precoIngredientesPizza(title)} />
-	</View>
-	
-	<Text style={styles.listTitle}>Produção</Text>
-	<View style={styles.container}>
-				<TextInput placeholder="Carne" style={styles.input} keyboardType="numeric" onChangeText={title=>modalFunctions.setPrecoPizza(title)} />
-		
-	<TextInput placeholder="Calabresa" style={styles.input} keyboardType="numeric" onChangeText={ ()=>{}} />		
-	
-	<TextInput placeholder="Banana" style={styles.input} keyboardType="numeric" onChangeText={()=>{}} />
-	</View>
-	
-	<View style={styles.container}>
-	
-	<TextInput placeholder="Pizza" style={styles.input} keyboardType="numeric" onChangeText={()=>{}} />
-	
-		</View>
-		<View style={{flexDirection:"row", justifyContent:"space-between"}}>
-				<TouchableOpacity style={styles.buttonCancel} onPress={()=> navigation.goBack()}><Text style={{color:"#56D6FF"}}>Cancelar</Text></TouchableOpacity>
-				
-				<TouchableOpacity style={styles.buttonCancel} onPress={edit}><Text style={{color:"#56D6FF"}}>Adicionar</Text></TouchableOpacity>
-				
-				
-				</View>
-
+			<Text style={styles.listTitle}>Gatos</Text>
+			<View style={{flexDirection:"row"}}>
+				<Input title="Massa" />
+				<Input title="Carne" />
+				<Input title="Calabresa" />
 			</View>
-		
-		</Modal>
 			
-			);
-		}
+			<View style={{flexDirection:"row"}}>
+				<Input title="Massa" />
+				<Input title="Carne" />
+				<Input title="Calabresa" />
+			</View>
+			
+			<View style={{flexDirection:"row"}}>
+				<Input title="Massa" />
+				<Input title="Carne" />
+				<Input title="Calabresa" />
+			</View>
+		</View>
+		
+	</Modal>
+	);
 }
 		
-		export default withNavigation(ModalEdicao);
-
+		
+		export default connect(state=>({modules:state}) )(ModalEdicao);
+		
+		
+		
+		
+		
+		
 const styles=StyleSheet.create({
 	containerMaster:{
 		flex:1,
@@ -95,9 +112,8 @@ const styles=StyleSheet.create({
 		
 	},
 	container:{
-		 flexDirection:"row",
 		
-	
+		 flexDirection:"row",
 		
 	},
 	input:{
@@ -114,7 +130,7 @@ const styles=StyleSheet.create({
 	
 	},
 	
-	buttonCancel:{
+	button:{
 		padding:20,
 		width:"30%",
 		borderRadius:4,
@@ -125,9 +141,10 @@ const styles=StyleSheet.create({
 		
 	},
 	listTitle:{
-		marginTop:10,
-		alignSelf:"center",
-		fontSize:20,
+		marginVertical:10,
+		marginLeft:5,
+		fontSize:25,
+		fontWeight:"bold",
 		color:"grey",
 	},
 	

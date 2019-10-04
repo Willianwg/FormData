@@ -1,147 +1,169 @@
-import React , { Component } from "react";
+import React , { useEffect, useState } from "react";
 import { AsyncStorage, View, Text , StyleSheet, TouchableOpacity, FlatList, TextInput, TouchableHighlight } from "react-native";
 import ModalCompra from "../components/modal";
+import { connect } from "react-redux";
 
 
-export default class Main extends Component{
-	
-	static navigationOptions={
-		title:"FormData",
-		
-		headerRight:<View/>,
-		headerLeft:<TouchableOpacity onPress={()=>{
-	const clear=async()=>{
-		try{
-		alert("removed");
-		await AsyncStorage.clear();
-		}catch(error){
-			alert("fail");
-		}
-	}
-	
-	clear();
-}
-} style={{marginLeft:10}}><Text>Clear</Text></TouchableOpacity>,
 
-};
+
+function Main({navigation, reduxState , dispatch}) {
 	
-constructor(props){
-	super(props);
-	
-	
-	this.state={
-		item:[],
-		today:"",
-		precoCalabresa:"",
-        precoCarne:"",
-        precoQueijo:"",
-        precoMassa :"",
-        precoIngredientesPizza:"",
-        precoBanana:"",
+	const [product, setItem]=useState([] );
+	const [today,setToday]=useState("");
+	const [precoCalabresa,setCalabresa]=useState("");
+    const [precoCarne,setCarne]=useState("");
+    const[precoQueijo,setQueijo]=useState("");
+    const [ precoMassa , setMassa]=useState("");
+    const[precoIngredientesPizza,setPizza]=useState("");
+    const[precoBanana,setBanana]=useState("");
       
-		modalVisible:false,
+	const[modalVisible, setModalVisibility]=useState(false);
 		
 		// modalFunctions
-			openModalEdicao:this.openModalEdicao,
-			modalStatus:false,
-			dismiss:this.closeModalEdicao,
-			adicionarItem:this.adicionarItem,
-	
-			editedItem:"",
+	const[modalStatus,setIModalStatus]=useState(false);
+	const[editedItem,setEditedItem]=useState("");
 			
-			handleEditItem:(editedItem)=>{
-		const NewItem=this.state.item.map(item=>{
-		if(item.id==editedItem){
+			const handleEditItem=(editedItem)=>{
+		const NewItem=product.map(item=>{
+		if(item.id==editedItem.id){
 			
-			item.precoMassa="FOIII";
+			product.precoMassa="FOIII";
 			
 			return item;
 			}
 			return item;
 		});
-		this.setState({item:NewItem});
-	},
- }
-} ;
+		setItem(NewItem);
+	}
 
-
-
-
-	
-	componentDidMount(){
-		this.load();
+	const state={
+	product,
+	today,
+	precoCalabresa,
+    precoCarne,
+	precoQueijo,
+	 precoMassa,
+    precoIngredientesPizza,
+    precoBanana,
+      
+	modalVisible,
+		// modalFunctions
+	modalStatus,
+	adicionarItem,
+	editedItem,
+			
+	 handleEditItem,
+		
 	};
 	
-	load=async()=>{
+	
+	function Render ({ item }){
+	return(
+	
+	<View style={styles.productView}>
+			
+		<TouchableOpacity onPress={()=>{navigation.navigate("Page2", { product:item, mainState:state, save:saveItemInStorage});} }>
+			<Text style={styles.productTitle}>
+				{ item.data }
+			</Text>
+		</TouchableOpacity> 
+			
+	</View>
+	);
+};
+
+
+
+	const sendToMain=()=>{
+		return {
+			type:"GET_STORAGE",
+			storage:product
+		}
+	}
+	
+	
+	useEffect(()=>{
+		
+		loadItems();
+		
+		navigation.setParams({remove:removeItems})
+		
+	}, [] );
+	
+	
+	const loadItems=async()=>{
 	try{
+		
+	let all=[];
 	const keys=await AsyncStorage.getAllKeys();
 	
-const item=await AsyncStorage.multiGet(keys,(err, stores)=>{
+const productLoaded=await AsyncStorage.multiGet(keys,(err, stores)=>{
 	
 	stores.map((result, i , store)=>{
 		let key=store[i][0];
 		let value=store[i][1];
 		
-	const parsed=JSON.parse(value);
-		
-	if(parsed!==null)this.setState({item:[...this.state.item,parsed]});
+		const parsed=JSON.parse(value);
+	
+		if(parsed !== null){
+			all.push(parsed);
+		}
+	
 	});
 });
 	
-	
+	setItem(all);
 	
 	}catch(error){
-		alert(error);
+		console.warn(error);
 	}
-	};
 	
-	adicionarItem=async( ) =>{
-		if(this.preenchido()){
+};
+
+
+	
+	const adicionarItem=async( ) =>{
+		if( !preenchido() ) return alert("preencha todos os dados");
+		
 		let today = new Date();
 		let dd = String(today.getDate()).padStart(2, '0');
 		let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 		let yyyy = today.getFullYear();
 
 		today = dd + '/' + mm+ '/' + yyyy;
-		await this.setState({today});
+		await setToday(today);
 
 		 let novoItem={
-			data: this.state.today,
-		precoCalabresa:Number(this.state.precoCalabresa),
-		precoQueijo:Number(this.state.precoQueijo),
-		precoCarne:Number(this.state.precoCarne),
-		precoMassa:Number(this.state.precoMassa),
-		precoBanana:Number(this.state.precoBanana),
-		precoIngredientesPizza:Number(this.state.precoIngredientesPizza),
+			data: today,
+		precoCalabresa:Number(precoCalabresa),
+		precoQueijo:Number(precoQueijo),
+		precoCarne:Number(precoCarne),
+		precoMassa:Number(precoMassa),
+		precoBanana:Number(precoBanana),
+		precoIngredientesPizza:Number(precoIngredientesPizza),
 		
-		precoTotal:Number(this.state.precoQueijo)+Number(this.state.precoCarne)+Number(this.state.precoBanana)+Number(this.state.precoMassa)+Number(this.state.precoIngredientesPizza)+Number(this.state.precoCalabresa),
+		precoTotal:Number(precoQueijo)+Number(precoCarne)+Number(precoBanana)+Number(precoMassa)+Number(precoIngredientesPizza)+Number(precoCalabresa),
 		
-		id:String(this.state.item.length+1),
+		id:String(product.length + 2),
+		
 		};
 		
-		this.saveItemInStorage(novoItem);
+		saveItemInStorage(novoItem);
 		
-		this.setState({item:[ ...this.state.item , novoItem]});
+		console.log(novoItem);
 		
-		this.closeModal();
-	} else alert("preencha todos os campos");
+		setItem( [...product, novoItem] );
+		
+		clearStatePrices();
+		
+		setModalVisibility(false);
+		
 	};
 	
-	renderItem= ({item}=this.state)=>(
-	
-	<View style={styles.productView}>
-			
-		<TouchableOpacity onPress={()=>{ this.setEditedItem(item.id); this.props.navigation.navigate("Page2", { product:item, mainState:this.state });} }>
-			<Text style={styles.productTitle}>
-				{item.data}
-			</Text>
-		</TouchableOpacity> 
-			
-	</View>
-	);
 	
 	
-	saveItemInStorage= async (novoItem)=>{
+	
+	const saveItemInStorage= async (novoItem)=>{
 	try{
 		await AsyncStorage.setItem(novoItem.id , JSON.stringify(novoItem));
 		
@@ -151,63 +173,79 @@ const item=await AsyncStorage.multiGet(keys,(err, stores)=>{
 		
 	};
 	
+	const removeItems=()=> setItem([]);
 	
-	removeItems=()=>{
-		this.setState({item:[]});
-		alert("foo");
-	};
-	
-	setEditedItem=(item)=>this.setState({editedItem: item});
-	
-	
-	openModal=()=>this.setState({modalVisible:true});
-	
-
-	closeModal=()=> this.setState({modalVisible:false});
-	
-
-	
-	preenchido=()=>{
-		if(this.state.precoCalabresa && this.state.precoCarne && this.state.precoQueijo && this.state.precoMassa && this.state.precoIngredientesPizza && this.state.precoBanana)
+	const preenchido=()=>{
+		if(precoCalabresa && precoCarne && precoQueijo && precoMassa && precoIngredientesPizza && precoBanana)
 		return true;
 		
 		else return false;
-		}
-	
-	setPrecoCarne= precoCarne =>( this.setState({precoCarne}));
+		};
 		
-	setPrecoQueijo= precoQueijo =>( this.setState({precoQueijo}));
-	
-	setPrecoMassa= precoMassa =>( this.setState({precoMassa}));
+	const clearStatePrices=()=>{
 		
-	setPrecoIngredientesPizza= precoIngredientesPizza =>(this.setState({precoIngredientesPizza}));
+			setCalabresa("");
+       	 setCarne("");
+       	 setQueijo("");
+    	    setMassa ("");
+     	   setPizza("");
+    	    setBanana("");
+       
+	};
 	
-	setPrecoBanana= precoBanana  =>( this.setState({precoBanana}));
 		
-	setPrecoCalabresa= precoCalabresa=>(this.setState({precoCalabresa}));
 	
-	
-	
-	render(){
 		return(
 		<View style={ styles.container }>
 			
-			<FlatList contentContainerStyle={styles.list} renderItem={ this.renderItem } data={ this.state.item} keyExtractor={ item => item.id }/>
-			
-			<ModalCompra modalStatus={this.state.modalVisible} dismiss={this.closeModal} adicionar={this.adicionarItem} 
-precoCalabresa={this.setPrecoCalabresa} precoCarne={this.setPrecoCarne} precoBanana={this.setPrecoBanana} precoQueijo={this.setPrecoQueijo}
-precoMassa={this.setPrecoMassa}
-precoIngredientesPizza={this.setPrecoIngredientesPizza}/>
+			<FlatList  
+showsVerticalScrollIndicator={ false } contentContainerStyle={styles.list} 
+renderItem={ ( { item } )=> <Render item={item } navigation={ navigation } /> } data={ product }
+keyExtractor={ item =>item.id } 
+			/>
+			<ModalCompra 
+changeModalVisibility={setModalVisibility}
+modalStatus={modalVisible} adicionar={adicionarItem} precoCalabresa={setCalabresa} precoCarne={setCarne} precoBanana={setBanana} precoQueijo={setQueijo}
+precoMassa={setMassa}
+precoIngredientesPizza={setPizza}/>
 
 	
 
-			<TouchableOpacity onPress={this.openModal} style={styles.button}><Text style={{color:"#56D6FF",fontSize:25}}>+</Text></TouchableOpacity>
+			<TouchableOpacity onPress={()=>setModalVisibility(true)} style={styles.button}><Text style={{color:"#56D6FF",fontSize:25}}>+</Text></TouchableOpacity>
 			
 		</View>
 			
 		);
+};
+
+
+Main.navigationOptions=({navigation})=>({
+		
+		title:"FormData",
+		
+		headerRight:<View/>,
+		headerLeft:<TouchableOpacity onPress={()=>{
+	const removeAllItemsOfStorage=async()=>{
+		try{
+		await AsyncStorage.clear();
+		}catch(error){
+			alert("fail");
+		}
 	}
-}
+	removeAllItemsOfStorage();
+	navigation.state.params.remove();
+	
+	}
+} style={{marginLeft:10}}><Text>Clear</Text></TouchableOpacity>,
+
+});
+
+
+
+
+
+export default connect( state=>({reduxState:state}) )(Main);
+
 
 const styles=StyleSheet.create({
 	container:{
@@ -217,12 +255,12 @@ const styles=StyleSheet.create({
 	},
 	
 	button:{
+		position:"absolute",
+		bottom:5,
+		right:5,
 		alignSelf:"flex-end",
-		marginRight:5,
-		marginBottom:5,
 		backgroundColor:"white",
 		width:"20%",
-		marginTop:10,
 		padding:20,
 		justifyContent:"center",
 		alignItems:"center",
